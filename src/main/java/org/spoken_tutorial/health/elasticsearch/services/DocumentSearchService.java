@@ -1,5 +1,7 @@
 package org.spoken_tutorial.health.elasticsearch.services;
 
+import java.io.IOException;
+
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.Parser;
 import org.slf4j.Logger;
@@ -10,6 +12,9 @@ import org.spoken_tutorial.health.elasticsearch.repositories.DocumentSearchRepos
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -45,4 +50,25 @@ public class DocumentSearchService {
 
         return new ResponseEntity<>(tut, HttpStatus.OK);
     }
+
+    public DocumentSearch findByDocumentId(String documentId) {
+        return repo.findByDocumentId(documentId);
+    }
+
+    public void delete(DocumentSearch documentSearch) {
+        repo.delete(documentSearch);
+    }
+
+    @Retryable(retryFor = { IOException.class,
+            RuntimeException.class }, maxAttempts = 5, backoff = @Backoff(delay = 5000))
+    public void save(DocumentSearch documentSearch) {
+        repo.save(documentSearch);
+    }
+
+    @Recover
+    public void recover(Exception e, DocumentSearch documentSearch) {
+        // Handle failure after retries
+        logger.error("Failed to save document after retries", e);
+    }
+
 }

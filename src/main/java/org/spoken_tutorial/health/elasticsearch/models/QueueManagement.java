@@ -10,8 +10,8 @@ import org.slf4j.MDC;
 import org.spoken_tutorial.health.elasticsearch.JsonService.JsonService;
 import org.spoken_tutorial.health.elasticsearch.config.Config;
 import org.spoken_tutorial.health.elasticsearch.contentfile.ContentsfromFile;
-import org.spoken_tutorial.health.elasticsearch.repositories.DocumentSearchRepository;
 import org.spoken_tutorial.health.elasticsearch.repositories.QueueManagementRepository;
+import org.spoken_tutorial.health.elasticsearch.services.DocumentSearchService;
 import org.spoken_tutorial.health.elasticsearch.threadpool.TaskProcessingService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -29,7 +29,7 @@ public class QueueManagement implements Runnable {
 
     @Autowired
     @Transient
-    private DocumentSearchRepository docRepo;
+    private DocumentSearchService docSearchService;
 
     @Autowired
     @Transient
@@ -413,7 +413,7 @@ public class QueueManagement implements Runnable {
             logger.info("{}", getStatusLog());
             setStartTime(System.currentTimeMillis());
 
-            documentSearch = docRepo.findByDocumentId(getDocumentId());
+            documentSearch = docSearchService.findByDocumentId(getDocumentId());
             if (getRequestType().equals(Config.ADD_DOCUMENT)) {
 
                 if (documentSearch != null) {
@@ -480,7 +480,7 @@ public class QueueManagement implements Runnable {
 
                     documentSearch.setRank(getRank());
                     documentSearch.setViewUrl(getViewUrl());
-                    docRepo.save(documentSearch);
+                    docSearchService.save(documentSearch);
                     setStatus(Config.STATUS_DONE);
                     logger.info("{}", getStatusLog());
 
@@ -578,7 +578,7 @@ public class QueueManagement implements Runnable {
                         if (getOrderValue() != 0)
                             documentSearch.setOrderValue(getOrderValue());
 
-                        docRepo.save(documentSearch);
+                        docSearchService.save(documentSearch);
                         setStatus(Config.STATUS_DONE);
                         logger.info("{}", getStatusLog());
 
@@ -591,14 +591,14 @@ public class QueueManagement implements Runnable {
                             documentSearch.setChangeTime(System.currentTimeMillis());
                         }
 
-                        docRepo.save(documentSearch);
+                        docSearchService.save(documentSearch);
                         setStatus(Config.STATUS_DONE);
                         logger.info("{}", getStatusLog());
 
                     }
 
                     else if (getRequestType().equals(Config.DELETE_DOCUMENT)) {
-                        docRepo.delete(documentSearch);
+                        docSearchService.delete(documentSearch);
                         setStatus(Config.STATUS_DONE);
                         logger.info("{}", getStatusLog());
 

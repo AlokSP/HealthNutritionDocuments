@@ -17,7 +17,6 @@ import org.spoken_tutorial.health.elasticsearch.JsonService.JsonService;
 import org.spoken_tutorial.health.elasticsearch.config.Config;
 import org.spoken_tutorial.health.elasticsearch.models.DocumentSearch;
 import org.spoken_tutorial.health.elasticsearch.models.QueueManagement;
-import org.spoken_tutorial.health.elasticsearch.repositories.DocumentSearchRepository;
 import org.spoken_tutorial.health.elasticsearch.repositories.QueueManagementRepository;
 import org.spoken_tutorial.health.elasticsearch.services.DocumentSearchService;
 import org.spoken_tutorial.health.elasticsearch.services.QueueManagementService;
@@ -38,9 +37,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class HomeController {
 
     private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
-
-    @Autowired
-    private DocumentSearchRepository docuSearchRepo;
 
     @Autowired
     private QueueManagementRepository queRepo;
@@ -132,7 +128,7 @@ public class HomeController {
     public Map<String, String> documentStatus(@PathVariable String documentId) {
 
         Map<String, String> resultMap = new HashMap<>();
-        DocumentSearch documentSearch = docuSearchRepo.findByDocumentId(documentId);
+        DocumentSearch documentSearch = docuSearchService.findByDocumentId(documentId);
 
         if (documentSearch == null) {
             resultMap.put(Config.STATUS, Config.STATUS_NOTFOUND);
